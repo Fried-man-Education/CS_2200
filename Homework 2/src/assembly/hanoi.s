@@ -6,11 +6,10 @@
 !============================================================
 
 main:
-    add     $zero, $zero, $zero     ! TODO: Here, you need to get the address of the stack
-                                    ! using the provided label to initialize the stack pointer.
-                                    ! load the label address into $sp and in the next instruction,
-    lw      $sp, 0($sp)             ! use $sp as base register to load the value (0xFFFF) into $sp.
-
+    lea     $sp, stack              ! load the label address into $sp
+    lw      $sp, 0($sp)             ! $sp to load val into $sp
+    lea     $fp, stack              ! load the label address into $fp
+    lw      $fp, 0($fp)             ! $fp to load val into $fp
 
     lea     $at, hanoi              ! loads address of hanoi label into $at
 
@@ -21,31 +20,40 @@ main:
     halt                            ! when we return, just halt
 
 hanoi:
-    add     $zero, $zero, $zero     ! TODO: perform post-call portion of
-                                    ! the calling convention. Make sure to
-                                    ! save any registers you will be using!
+    ! perform post-call portion of the calling convention. Make sure to save any registers you will be using!
+    addi    $sp, $sp, -1            ! allocate space for og frame pointer
+    sw      $fp, 0($sp)             ! store $fp into mem location at current $sp
+    addi    $fp, $sp, 0             ! store $sp into $fp
 
-    add     $zero, $zero, $zero     ! TODO: Implement the following pseudocode in assembly:
-                                    ! IF ($a0 == 1)
-                                    !    GOTO base
-                                    ! ELSE
-                                    !    GOTO else
+    ! ($a0 == 1) ? GOTO base : GOTO else;
+    addi    $t0, $zero, 1           ! $t0 = 1
+    bgt     $a0, $t0, else          ! if ($t0 > 1) GOTO else
+    br       base                   ! GOTO else if ($a0 == 1)
 
 else:
-    add     $zero, $zero, $zero     ! TODO: perform recursion after decrementing
-                                    ! the parameter by 1. Remember, $a0 holds the
-                                    ! parameter value.
+    ! perform recursion after decrementing the parameter by 1. Remember, $a0 holds the parameter value.
+    addi    $a0, $a0, -1            ! n--
+    lea     $at, hanoi              ! load the address of hanoi
+    addi    $sp, $sp, -2            ! push 2 spots on stack
+    sw      $ra, -1($fp)            ! store RA in stack[-1]
+    sw      $a0, -2($fp)            ! store arg 0 in stack[-2]
+    jalr    $ra, $at                ! hanoi()
+    lw      $ra, -1($fp)            ! load RA from the stack
+    addi    $sp, $sp, 2             ! pop 2 spots off stack
 
-    add     $zero, $zero, $zero     ! TODO: Implement the following pseudocode in assembly:
-                                    ! $v0 = 2 * $v0 + 1
-                                    ! RETURN $v0
+    ! $v0 = 2 * $v0 + 1; RETURN $v0;
+    add     $v0, $v0, $v0           ! $v0 *= 2
+    addi    $v0, $v0, 1             ! $v0++
+    br      teardown                ! GOTO teardown
 
 base:
-    add     $zero, $zero, $zero     ! TODO: Return 1
+    addi     $v0, $v0, 1            ! return 1
 
 teardown:
-    add     $zero, $zero, $zero     ! TODO: perform pre-return portion
-                                    ! of the calling convention
+    ! perform pre-return portion of the calling convention
+    lw      $fp, 0($fp)             ! restore old frame pointer
+    addi    $sp, $sp, 1             ! pop stack
+
     jalr    $zero, $ra              ! return to caller
 
 

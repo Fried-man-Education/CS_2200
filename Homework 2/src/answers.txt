@@ -1,10 +1,11 @@
 CS 2200 Spring 2021
 Homework 2
 
-Name:
-GT Username:
+Name: Andrew Friedman
+GT Username: afriedman38
 
 Question 1
 ----------
 
-/* Fix me */
+lea $ra, 0
+br target	! Bounded within 20 bit offset
