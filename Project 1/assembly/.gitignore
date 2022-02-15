@@ -1,0 +1,4 @@
+*.pyc
+*.bin
+*.hex
+*.sym
