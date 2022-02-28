@@ -1,6 +1,6 @@
 /**
- * Name: <your name>
- * GTID: <your GTID>
+ * Name: Andrew Friedman
+ * GTID: 903506792
  */
 
 /*
@@ -24,13 +24,17 @@ int main(int argc, char *argv[])
      * If the user uses the t argument, then tests should be set to 1.
      * Using getopt() to take in the arguments is recommended, but not required.
      */
-
-    if (tests == 1)
+    //printf("return value: %d\n", getopt(argc, argv, ":"));
+    printf("argv[1]: %s\n", argv[1]);
+    if (!strcmp(argv[1], "-t"))
     {
-        run_tests();
+	tests = 1;
+	run_tests();
     }
     else
     {
+	length = atoi(argv[2]);
+	printf("length: %d\n", length);
         char *message = generateMessage();
         printf("Message: %s\n", message);
     }
