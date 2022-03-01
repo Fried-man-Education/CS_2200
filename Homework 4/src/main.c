@@ -24,8 +24,6 @@ int main(int argc, char *argv[])
      * If the user uses the t argument, then tests should be set to 1.
      * Using getopt() to take in the arguments is recommended, but not required.
      */
-    //printf("return value: %d\n", getopt(argc, argv, ":"));
-    printf("argv[1]: %s\n", argv[1]);
     if (!strcmp(argv[1], "-t"))
     {
 	tests = 1;
@@ -34,7 +32,6 @@ int main(int argc, char *argv[])
     else
     {
 	length = atoi(argv[2]);
-	printf("length: %d\n", length);
         char *message = generateMessage();
         printf("Message: %s\n", message);
     }
@@ -76,11 +73,12 @@ char *generateMessage()
     for (int i = 0; i < length; i++)
     {
         char *word = remove_from_index(dictionary_as_list, i % dictionary_as_list->size);
-        add_at_index(message, word, i + 1);
+        add_at_index(message, word, i);
     }
 
     // Adds the word "half" at the half way point in the list (round down if half is not an integer)
     add_at_index(message, "Half", message->size / 2);
+    
 
     // Creates the the message as a string to be printed.
     char *string_message = NULL;
@@ -89,8 +87,10 @@ char *generateMessage()
         // Removes the first word from the list
         char *word = remove_from_index(message, 0);
 
-        // Calculates the new size needed for string message for the word to be appended.
-        size_t new_size = strlen(string_message) + strlen(word) + 1;
+
+	// Calculates the new size needed for string message for the word to be appended.
+        size_t new_size = strlen(word) + 1;
+	if (string_message) new_size += strlen(string_message);
 
         // Reserves the memory space in the heap
         string_message = realloc(string_message, new_size);

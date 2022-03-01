@@ -14,7 +14,7 @@
 /*
  * Dictionary and Dictionary length used in generating the pseudorandom message.
  */
-int dictionary_length = 17;
+int dictionary_length = 16;
 char *dictionary[] = {
     "go",
     "congratulations",
