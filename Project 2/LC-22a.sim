@@ -386,6 +386,16 @@
         },
         {
           "name": "com.ra4king.circuitsim.gui.peers.wiring.Tunnel",
+          "x": 6,
+          "y": 66,
+          "properties": {
+            "Label": "INT",
+            "Direction": "EAST",
+            "Bitsize": "1"
+          }
+        },
+        {
+          "name": "com.ra4king.circuitsim.gui.peers.wiring.Tunnel",
           "x": 19,
           "y": 15,
           "properties": {
@@ -646,6 +656,16 @@
         },
         {
           "name": "com.ra4king.circuitsim.gui.peers.wiring.Tunnel",
+          "x": 77,
+          "y": 58,
+          "properties": {
+            "Label": "INT",
+            "Direction": "WEST",
+            "Bitsize": "1"
+          }
+        },
+        {
+          "name": "com.ra4king.circuitsim.gui.peers.wiring.Tunnel",
           "x": 124,
           "y": 55,
           "properties": {
@@ -710,16 +730,6 @@
           "y": 78,
           "properties": {
             "Label": "DrPC",
-            "Direction": "WEST",
-            "Bitsize": "1"
-          }
-        },
-        {
-          "name": "com.ra4king.circuitsim.gui.peers.wiring.Tunnel",
-          "x": 113,
-          "y": 45,
-          "properties": {
-            "Label": "Tout",
             "Direction": "WEST",
             "Bitsize": "1"
           }
@@ -1265,26 +1275,6 @@
           }
         },
         {
-          "name": "com.ra4king.circuitsim.gui.peers.wiring.Tunnel",
-          "x": 2,
-          "y": 66,
-          "properties": {
-            "Label": "microINT",
-            "Direction": "EAST",
-            "Bitsize": "1"
-          }
-        },
-        {
-          "name": "com.ra4king.circuitsim.gui.peers.wiring.Tunnel",
-          "x": 77,
-          "y": 58,
-          "properties": {
-            "Label": "microINT",
-            "Direction": "WEST",
-            "Bitsize": "1"
-          }
-        },
-        {
           "name": "com.ra4king.circuitsim.gui.peers.wiring.ConstantPeer",
           "x": 70,
           "y": 52,
@@ -1368,14 +1358,6 @@
             "Value": "12",
             "Direction": "WEST",
             "Bitsize": "4"
-          }
-        },
-        {
-          "name": "com.ra4king.circuitsim.gui.peers.misc.Text",
-          "x": 115,
-          "y": 51,
-          "properties": {
-            "Text": "4.1.4"
           }
         },
         {
@@ -6483,18 +6465,6 @@
       "name": "Microcontroller",
       "components": [
         {
-          "name": "com.ra4king.circuitsim.gui.peers.memory.ROMPeer",
-          "x": 39,
-          "y": 59,
-          "properties": {
-            "Label location": "NORTH",
-            "Contents": "03 06 09 0c 10 14 17 19 1a 1e 22 5-00",
-            "Label": "Sequencer",
-            "Bitsize": "6",
-            "Address bits": "4"
-          }
-        },
-        {
           "name": "com.ra4king.circuitsim.gui.peers.wiring.PinPeer",
           "x": 68,
           "y": 10,
@@ -6504,6 +6474,18 @@
             "Is input?": "No",
             "Direction": "WEST",
             "Bitsize": "1"
+          }
+        },
+        {
+          "name": "com.ra4king.circuitsim.gui.peers.memory.ROMPeer",
+          "x": 39,
+          "y": 74,
+          "properties": {
+            "Label location": "NORTH",
+            "Contents": "01 2b 14-0",
+            "Label": "Interrupt",
+            "Bitsize": "6",
+            "Address bits": "1"
           }
         },
         {
@@ -6630,18 +6612,6 @@
             "Label location": "NORTH",
             "Label": "State",
             "Bitsize": "6"
-          }
-        },
-        {
-          "name": "com.ra4king.circuitsim.gui.peers.memory.ROMPeer",
-          "x": 33,
-          "y": 27,
-          "properties": {
-            "Label location": "NORTH",
-            "Contents": "00606201 00001082 00e00900 00084044 00108045 00020100 00084047 00108048 00420100 0008404a 0000840b 00020100 0008404d 0000840e 0000210f 00020080 00084051 00008412 00002113 00040040 00004215 00008416 00000900 00020218 00080840 00000019 0000405b 0008805c 0221011d 01000000 0000405f 00088060 00210121 01000000 00004223 00008424 00020100 27-00000000",
-            "Label": "Main",
-            "Bitsize": "31",
-            "Address bits": "6"
           }
         },
         {
@@ -7016,13 +6986,13 @@
         {
           "name": "com.ra4king.circuitsim.gui.peers.memory.ROMPeer",
           "x": 39,
-          "y": 74,
+          "y": 59,
           "properties": {
             "Label location": "NORTH",
-            "Contents": "2-00 14-0",
-            "Label": "Interrupt",
+            "Contents": "03 06 09 0c 10 14 17 19 1a 1e 22 25 26 27 28 00",
+            "Label": "Sequencer",
             "Bitsize": "6",
-            "Address bits": "1"
+            "Address bits": "4"
           }
         },
         {
@@ -7062,6 +7032,18 @@
             "Is input?": "No",
             "Direction": "WEST",
             "Bitsize": "1"
+          }
+        },
+        {
+          "name": "com.ra4king.circuitsim.gui.peers.memory.ROMPeer",
+          "x": 33,
+          "y": 27,
+          "properties": {
+            "Label location": "NORTH",
+            "Contents": "00606201 00001082 00e00900 00084044 00108045 00020100 00084047 00108048 00420100 0008404a 0000840b 00020100 0008404d 0000840e 0000210f 00020080 00084051 00008412 00002113 00040040 00004215 00008416 00000900 00020218 00080840 00000019 0000405b 0008805c 0221011d 01000000 0000405f 00088060 00210121 01000000 00004223 00008424 00020100 00000600 00000400 03010e00 00008068 004000a9 01000840 0340452b 000400ac 00011000 18-00000000",
+            "Label": "Main",
+            "Bitsize": "31",
+            "Address bits": "6"
           }
         }
       ],
