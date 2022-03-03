@@ -91,15 +91,77 @@ AGAIN:  add $v0, $v0, $a0                       ! return value += argument0
         blt $t0, $a1, AGAIN                     ! while sentinel < argument, loop again
         jalr $zero, $ra                         ! return from mult
 
-timer_handler:
-        add $zero, $zero, $zero                 ! TODO FIX ME
+timer_handler: addi $sp, $sp, -1
+        sw $k0, 0($sp)
+        ei
+        addi $sp, $sp, -1
+        sw $t0, 0($sp)
+        addi $sp, $sp, -1
+        sw $t1, 0($sp)
+        lea $t0, ticks
+        lw $t0, 0($t0)
+        lw $t1, 0($t0)
+        addi $t1, $t1, 1
+        sw $t1, 0($t0)
+        lw $t0, 1($sp)
+        lw $t1, 0($sp)
+        addi $sp, $sp, 2
+        di
+        lw $k0, 0($sp)
+        addi $sp, $sp, 1
+        reti
 
-toaster_handler:
-        ! retrieve the data from the device and check if it is a minimum or maximum value
-        ! then calculate the difference between minimum and maximum value
-        ! (hint: think about what ALU operations you could use to implement subract using 2s compliment)
+toaster_handler: addi $sp, $sp, -1
+        sw $k0, 0($sp)
+        ei
+        addi $sp, $sp, -1
+        sw $t2, 0($sp)
+        addi $sp, $sp, -1
+        sw $t1, 0($sp)
+        addi $sp, $sp, -1
+        sw $t0, 0($sp)
+        lea $t0, maxval
+        lw $t0, 0($t0)
+        lw $t0, 0($t0)
+        lea $t1, minval
+        lw $t1, 0($t1)
+        lw $t1, 0($t1)
+        in $t2, 1
+        bgt $t2, $t0, bigger
+        blt $t2, $t1, smaller
+        br end
 
-        add $zero, $zero, $zero                 ! TODO FIX ME
+
+bigger: lea $t0, maxval
+        lw $t0, 0($t0)
+        sw $t2, 0($t0)
+        br end
+
+smaller: lea $t1, minval
+        lw $t1, 0($t1)
+        sw $t2, 0($t1)
+        br end
+
+end: lea $t2, range
+        lw $t2, 0($t2)
+        lea $t1, minval
+        lw $t1, 0($t1)
+        lw $t1, 0($t1)
+        lea $t0, maxval
+        lw $t0, 0($t0)
+        lw $t0, 0($t0)
+        nand $t1, $t1, $t1
+        addi $t1, $t1, 1
+        add $t0, $t0, $t1
+        sw $t0, 0($t2)
+        lw $t2, 2($sp)
+        lw $t1, 1($sp)
+        lw $t0, 0($sp)
+        addi $sp, $sp, 3
+        di
+        lw $k0, 0($sp)
+        addi $sp, $sp, 1
+        reti
 
 
 initsp: .fill 0xA000
