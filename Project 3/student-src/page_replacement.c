@@ -87,8 +87,14 @@ pfn_t select_victim_frame() {
             return last_unprotected;
         }
     } else if (replacement == FIFO) {
-        // TODO: Implement a FIFO algorithm here
-
+        static pfn_t fPointer = 0;
+        for (pfn_t i = fPointer; i < num_entries; i++) {
+            if (!frame_table[i].protected) {
+                fPointer = (i != NUM_FRAMES - 1) * (i + 1);
+                return i;
+            }
+            if (i == NUM_FRAMES - 1) i = 0;
+        }
     } else if (replacement == CLOCKSWEEP) {
         static pfn_t cPointer = 0;
         for (pfn_t i = cPointer; i < NUM_FRAMES; i++) {
