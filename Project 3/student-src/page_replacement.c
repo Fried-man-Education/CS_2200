@@ -90,8 +90,17 @@ pfn_t select_victim_frame() {
         // TODO: Implement a FIFO algorithm here
 
     } else if (replacement == CLOCKSWEEP) {
-        // TODO: Implement a clocksweep page replacement algorithm here
-
+        static pfn_t cPointer = 0;
+        for (pfn_t i = cPointer; i < NUM_FRAMES; i++) {
+            if (!frame_table[i].protected) {
+                if (frame_table[i].referenced) frame_table[i].referenced = 0;
+                else {
+                    cPointer = (i != NUM_FRAMES - 1) * (i + 1);
+                    return i;
+                }
+            }
+            if (i == NUM_FRAMES - 1) i = 0;
+        }
     }
 
     /* If every frame is protected, give up. This should never happen
