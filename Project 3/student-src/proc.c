@@ -26,12 +26,12 @@
  * ----------------------------------------------------------------------------------
  */
 void proc_init(pcb_t *proc) {
-    (*proc).saved_ptbr = free_frame(); // update the process's PCB
-    // guaranteed that the memory returned by the free frame allocator is empty:
-    for (int i = (*proc).saved_ptbr; i < (*proc).saved_ptbr + PAGE_SIZE; i++) {
-      mem[i] = 0;
-    }
-    (*frame_table).process = proc; // update the frame table
+    pfn_t page_table = free_frame();
+    memset(mem + page_table * PAGE_SIZE, 0, PAGE_SIZE);
+
+    fte_t* fte = frame_table + page_table;
+    proc->saved_ptbr = page_table;
+    fte->protected = 1;
 }
 
 /**
@@ -52,9 +52,7 @@ void proc_init(pcb_t *proc) {
  * ----------------------------------------------------------------------------------
  */
 void context_switch(pcb_t *proc) {
-    current_process = proc; // Switches the currently running process
-    // tell the processor to use the new process's page table:
-    PTBR = (*current_process).saved_ptbr;
+    PTBR = proc->saved_ptbr; // Switches the currently running process
 }
 
 /**

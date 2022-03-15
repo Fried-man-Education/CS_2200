@@ -24,12 +24,11 @@ fte_t *frame_table;
  * ----------------------------------------------------------------------------------
  */
 void system_init(void) {
-    frame_table = mem; // initialize the frame_table pointer
+    // You should zero out the entries in the frame table
+    memset(mem, 0, PAGE_SIZE);
+    frame_table = (fte_t*) mem; // initialize the frame_table pointer
     // mark the first entry of the frame table as “protected”
-    (*frame_table).protected = *mem;
-    // You should zero out the entries in the frame table:
-    for (int i = 0; i < MEM_SIZE; i++)
-      if ((*frame_table).protected != *mem + i) mem[i] = 0;
+    frame_table->protected = 1;
 }
 
 /**
