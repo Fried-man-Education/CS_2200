@@ -16,19 +16,22 @@
  *      implementing these functions.
  * ----------------------------------------------------------------------------------
  */
- // The system has 16KB pages and a 24-bit virtual address space.
- // addr is int32
+int numBits = sizeof(vaddr_t)*8; // vaddr_t is 32 bits
+
+ // The system has 16KB (2^14) pages and a 24-bit virtual address space.
  // (8)????????(10)NNNNNNNNNN(14)OOOOOOOOOOOOOO
 static inline vpn_t vaddr_vpn(vaddr_t addr) {
-    // get rid of left 8 bits
-    // move 10 bits to far right (get rid of right 14 bits)
-    return addr << 8 >> 22; // 2^14 = 16kb
+    return addr
+      << numBits - VADDR_LEN /* get rid of left (32-24=8) bits */
+      >> numBits - (VADDR_LEN - OFFSET_LEN); // move 10 bits to far right
 }
 
 static inline uint16_t vaddr_offset(vaddr_t addr) {
-    // get rid of left 18 bits
-    // move 14 bits to far right
-    return addr << 18 >> 18; // 32 - 14 = 18
+
+    int shift = numBits - OFFSET_LEN; // 18 = 32 - 14
+    return addr
+      << shift /* get rid of left 18 bits */
+      >> shift; // move 14 bits to far right
 }
 
 #pragma GCC diagnostic
