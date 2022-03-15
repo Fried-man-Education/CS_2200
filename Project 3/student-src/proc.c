@@ -52,7 +52,9 @@ void proc_init(pcb_t *proc) {
  * ----------------------------------------------------------------------------------
  */
 void context_switch(pcb_t *proc) {
-    // TODO: update any global vars and proc's PCB to match the context_switch.
+    current_process = proc; // Switches the currently running process
+    // tell the processor to use the new process's page table:
+    PTBR = (*current_process).saved_ptbr;
 }
 
 /**
