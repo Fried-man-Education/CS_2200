@@ -13,33 +13,38 @@ fte_t *frame_table;
 /**
  * --------------------------------- PROBLEM 2 --------------------------------------
  * Checkout PDF sections 4 for this problem
- * 
+ *
  * In this problem, you will initialize the frame_table pointer. The frame table will
- * be located at physical address 0 in our simulated memory. You should zero out the 
+ * be located at physical address 0 in our simulated memory. You should zero out the
  * entries in the frame table, in case for any reason physical memory is not clean.
- * 
+ *
  * HINTS:
  *      - mem: Simulated physical memory already allocated for you.
  *      - PAGE_SIZE: The size of one page
  * ----------------------------------------------------------------------------------
  */
 void system_init(void) {
-    // TODO: initialize the frame_table pointer.
+    frame_table = mem; // initialize the frame_table pointer
+    // mark the first entry of the frame table as “protected”
+    (*frame_table).protected = *mem;
+    // You should zero out the entries in the frame table:
+    for (int i = 0; i < MEM_SIZE; i++)
+      if ((*frame_table).protected != *mem + i) mem[i] = 0;
 }
 
 /**
  * --------------------------------- PROBLEM 5 --------------------------------------
  * Checkout PDF section 6 for this problem
- * 
+ *
  * Takes an input virtual address and performs a memory operation.
- * 
+ *
  * @param addr virtual address to be translated
  * @param rw   'r' if the access is a read, 'w' if a write
  * @param data If the access is a write, one byte of data to write to our memory.
  *             Otherwise NULL for read accesses.
- * 
+ *
  * HINTS:
- *      - Remember that not all the entry in the process's page table are mapped in. 
+ *      - Remember that not all the entry in the process's page table are mapped in.
  *      Check what in the pte_t struct signals that the entry is mapped in memory.
  * ----------------------------------------------------------------------------------
  */
