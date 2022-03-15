@@ -16,9 +16,6 @@
  *      implementing these functions.
  * ----------------------------------------------------------------------------------
  */
-// The system has 16KB (2^14) pages and a 24-bit virtual address space.
-// (8)????????(10)NNNNNNNNNN(14)OOOOOOOOOOOOOO
-
 static inline vpn_t vaddr_vpn(vaddr_t addr) {
     return addr / PAGE_SIZE;
 }

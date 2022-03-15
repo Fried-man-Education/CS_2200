@@ -26,12 +26,13 @@
  * ----------------------------------------------------------------------------------
  */
 void proc_init(pcb_t *proc) {
-    pfn_t page_table = free_frame();
-    memset(mem + page_table * PAGE_SIZE, 0, PAGE_SIZE);
-
-    fte_t* fte = frame_table + page_table;
-    proc->saved_ptbr = page_table;
-    fte->protected = 1;
+    pfn_t pageTable = free_frame();
+    memset(mem + pageTable * PAGE_SIZE, 0, PAGE_SIZE);
+    ( * proc).saved_ptbr = pageTable;
+    fte_t * procFrame = (frame_table + pageTable);
+    ( * procFrame).protected = 1;
+    ( * procFrame).mapped = 1;
+    ( * procFrame).process = proc;
 }
 
 /**
@@ -52,7 +53,7 @@ void proc_init(pcb_t *proc) {
  * ----------------------------------------------------------------------------------
  */
 void context_switch(pcb_t *proc) {
-    PTBR = proc->saved_ptbr; // Switches the currently running process
+    PTBR = ( * proc).saved_ptbr;
 }
 
 /**
@@ -69,10 +70,18 @@ void context_switch(pcb_t *proc) {
  * ----------------------------------------------------------------------------------
  */
 void proc_cleanup(pcb_t *proc) {
-    // TODO: Iterate the proc's page table and clean up each valid page
     for (size_t i = 0; i < NUM_PAGES; i++) {
-
+        pte_t * temp = (pte_t * )(mem + ( * proc).saved_ptbr * PAGE_SIZE) + i;
+        if (( * temp).valid) {
+            ( * temp).valid = 0;
+            frame_table[( * temp).pfn].mapped = 0;
+        }
+        if (swap_exists(temp)) swap_free(temp);
     }
+
+    fte_t * currFT = frame_table + ( * proc).saved_ptbr;
+    ( * currFT).protected = 0;
+    ( * currFT).mapped = 0;
 }
 
 #pragma GCC diagnostic pop

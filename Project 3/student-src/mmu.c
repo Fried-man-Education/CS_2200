@@ -24,11 +24,9 @@ fte_t *frame_table;
  * ----------------------------------------------------------------------------------
  */
 void system_init(void) {
-    // You should zero out the entries in the frame table
     memset(mem, 0, PAGE_SIZE);
-    frame_table = (fte_t*) mem; // initialize the frame_table pointer
-    // mark the first entry of the frame table as “protected”
-    frame_table->protected = 1;
+    frame_table = (fte_t * ) mem;
+    ( * frame_table).protected = 1;
 }
 
 /**
@@ -48,15 +46,16 @@ void system_init(void) {
  * ----------------------------------------------------------------------------------
  */
 uint8_t mem_access(vaddr_t addr, char rw, uint8_t data) {
-    // TODO: translate virtual address to physical, then perfrom the specified operation
+    pte_t * temp = (pte_t * )(mem + PTBR * PAGE_SIZE) + vaddr_vpn(addr);
+    if (!( * temp).valid) page_fault(addr);
 
-    /* Either read or write the data to the physical address
-       depending on 'rw' */
-    if (rw == 'r') {
+    ( * ((fte_t * ) & frame_table[( * temp).pfn])).referenced = 1;
 
-    } else {
+    paddr_t physAddr = (paddr_t)((( * temp).pfn << OFFSET_LEN)) | vaddr_offset(addr);
+    stats.accesses++;
+    if (rw == 'r') return mem[physAddr];
 
-    }
-
-    return 0;
+    ( * temp).dirty = 1;
+    mem[physAddr] = data;
+    return mem[physAddr];
 }

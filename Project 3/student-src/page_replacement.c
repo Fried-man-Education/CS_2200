@@ -12,30 +12,34 @@ pfn_t last_evicted = 0;
 /**
  * --------------------------------- PROBLEM 7 --------------------------------------
  * Checkout PDF section 7 for this problem
- * 
+ *
  * Make a free frame for the system to use. You call the select_victim_frame() method
- * to identify an "available" frame in the system (already given). You will need to 
+ * to identify an "available" frame in the system (already given). You will need to
  * check to see if this frame is already mapped in, and if it is, you need to evict it.
- * 
+ *
  * @return victim_pfn: a phycial frame number to a free frame be used by other functions.
- * 
+ *
  * HINTS:
- *      - When evicting pages, remember what you checked for to trigger page faults 
+ *      - When evicting pages, remember what you checked for to trigger page faults
  *      in mem_access
  *      - If the page table entry has been written to before, you will need to use
  *      swap_write() to save the contents to the swap queue.
  * ----------------------------------------------------------------------------------
  */
 pfn_t free_frame(void) {
-    pfn_t victim_pfn;
-    victim_pfn = select_victim_frame();
+  pfn_t vicFrame = select_victim_frame();
+  if (frame_table[vicFrame].mapped) {
+      pte_t * temp = (pte_t * )(mem + ( * frame_table[vicFrame].process).saved_ptbr * PAGE_SIZE) + frame_table[vicFrame].vpn;
 
-    // TODO: evict any mapped pages.
-    if (frame_table[victim_pfn].mapped) {
+      if (( * temp).dirty) {
+          swap_write(temp, mem + ( * temp).pfn * PAGE_SIZE);
+          stats.writebacks++;
+      }
 
-    }
-
-    return victim_pfn;
+      frame_table[vicFrame].mapped = 0;
+      ( * temp).valid = 0;
+  }
+  return vicFrame;
 }
 
 
@@ -43,14 +47,14 @@ pfn_t free_frame(void) {
 /**
  * --------------------------------- PROBLEM 9 --------------------------------------
  * Checkout PDF section 7, 9, and 11 for this problem
- * 
+ *
  * Finds a free physical frame. If none are available, uses either a
  * randomized, FCFS, or clocksweep algorithm to find a used frame for
  * eviction.
- * 
+ *
  * @return The physical frame number of a victim frame.
- * 
- * HINTS: 
+ *
+ * HINTS:
  *      - Use the global variables MEM_SIZE and PAGE_SIZE to calculate
  *      the number of entries in the frame table.
  *      - Use the global last_evicted to keep track of the pointer into the frame table
@@ -82,13 +86,11 @@ pfn_t select_victim_frame() {
         if (last_unprotected < NUM_FRAMES) {
             return last_unprotected;
         }
-
-
     } else if (replacement == FIFO) {
         // TODO: Implement a FIFO algorithm here
 
     } else if (replacement == CLOCKSWEEP) {
-        // TODO: Implement a clocksweep page replacement algorithm here 
+        // TODO: Implement a clocksweep page replacement algorithm here
 
     }
 
