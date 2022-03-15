@@ -19,12 +19,12 @@
 // The system has 16KB (2^14) pages and a 24-bit virtual address space.
 // (8)????????(10)NNNNNNNNNN(14)OOOOOOOOOOOOOO
 
-int numBits = sizeof(vaddr_t)*8; // vaddr_t is 32 bits
+#define numBits sizeof(vaddr_t)*8 // vaddr_t is 32 bits
 
 static inline vpn_t vaddr_vpn(vaddr_t addr) {
     return addr
-      << numBits - VADDR_LEN /* get rid of left (32-24=8) bits */
-      >> numBits - (VADDR_LEN - OFFSET_LEN); // move 10 bits to far right
+      << (numBits - VADDR_LEN) /* get rid of left (32-24=8) bits */
+      >> (numBits - (VADDR_LEN - OFFSET_LEN)); // move 10 bits to far right
 }
 
 static inline uint16_t vaddr_offset(vaddr_t addr) {
