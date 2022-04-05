@@ -63,12 +63,23 @@ static int timeslice = 0;
 void enqueue(queue_t *queue, pcb_t *process)
 {
     pthread_mutex_lock( & queue_mutex);
-    pcb_t * curr_tail = ( * queue).tail;
 
-    if (curr_tail) {
-      ( * queue).tail = ( * curr_tail).next = process;
-      ( * ( * queue).tail).next = 0;
-    } else ( * queue).head = ( * queue).tail = process;
+    if (( * queue).tail) {
+      if (scheduler_algorithm == PR) {
+        if (( * ( * queue).head).priority > ( * process).priority) {
+          ( * process).next = ( * queue).head;
+          ( * queue).head = process;
+        } else {
+          pcb_t * curr = ( * queue).head;
+          while (( * curr).next && ( * ( * curr).next).priority < ( * process).priority) curr = ( * curr).next;
+          ( * process).next = ( * curr).next;
+          ( * curr).next = process;
+        }
+      } else {
+        ( * queue).tail = ( * ( * queue).tail).next = process;
+        ( * ( * queue).tail).next = 0;
+      }
+    } else( * queue).head = ( * queue).tail = process;
 
     pthread_cond_signal( & queue_not_empty);
     pthread_mutex_unlock( & queue_mutex);
@@ -81,30 +92,27 @@ void enqueue(queue_t *queue, pcb_t *process)
  */
 pcb_t *dequeue(queue_t *queue)
 {
-    pcb_t * ret_val;
+    pcb_t * output;
     pthread_mutex_lock( & queue_mutex);
 
-    if (is_empty(queue)) {
-      pthread_mutex_unlock( & queue_mutex);
-      return 0;
-    }
-
-    ret_val = ( * queue).head;
+    if (is_empty(queue) && !pthread_mutex_unlock( & queue_mutex)) return 0;
+    output = ( * queue).head;
     ( * queue).head = ( * ( * queue).head).next;
     if (!( * queue).head) ( * queue).tail = 0;
-    ( * ret_val).next = 0;
+    ( * output).next = 0;
+
     pthread_mutex_unlock( & queue_mutex);
-    return ret_val;
+    return output;
 }
 
 /** ------------------------Problem 0-----------------------------------
  * Checkout PDF Section 2 for this problem
- * 
+ *
  * is_empty() is a helper function that returns whether the ready queue
  * has any processes in it.
- * 
+ *
  * @param queue pointer to the ready queue
- * 
+ *
  * @return a boolean value that indicates whether the queue is empty or not
  */
 bool is_empty(queue_t *queue)
@@ -114,29 +122,28 @@ bool is_empty(queue_t *queue)
 
 /** ------------------------Problem 1B & 3-----------------------------------
  * Checkout PDF Section 3 and 5 for this problem
- * 
+ *
  * schedule() is your CPU scheduler.
- * 
+ *
  * Remember to specify the timeslice if the scheduling algorithm is Round-Robin
- * 
+ *
  * @param cpu_id the target cpu we decide to put our process in
  */
 static void schedule(unsigned int cpu_id)
 {
     pcb_t * process = dequeue(rq);
+    if (process) ( * process).state = PROCESS_RUNNING;
+    pthread_mutex_lock( & current_mutex);
 
-    if (process) {
-      ( * process).state = PROCESS_RUNNING;
-      pthread_mutex_lock( & current_mutex);
-      current[cpu_id] = process;
-      pthread_mutex_unlock( & current_mutex);
-      context_switch(cpu_id, process, timeslice);
-    } else context_switch(cpu_id, 0, -1);
+    current[cpu_id] = process;
+
+    pthread_mutex_unlock( & current_mutex);
+    context_switch(cpu_id, process, timeslice);
 }
 
 /**  ------------------------Problem 1A-----------------------------------
  * Checkout PDF Section 3 for this problem
- * 
+ *
  * idle() is your idle process.  It is called by the simulator when the idle
  * process is scheduled.
  *
@@ -154,13 +161,13 @@ extern void idle(unsigned int cpu_id)
 
 /** ------------------------Problem 2 & 3-----------------------------------
  * Checkout Section 4 and 5 for this problem
- * 
- * preempt() is the handler used in Round-robin and Preemptive Priority 
+ *
+ * preempt() is the handler used in Round-robin and Preemptive Priority
  * Scheduling
  *
  * This function should place the currently running process back in the
  * ready queue, and call schedule() to select a new runnable process.
- * 
+ *
  * @param cpu_id the cpu in which we want to preempt process
  */
 extern void preempt(unsigned int cpu_id)
@@ -168,16 +175,16 @@ extern void preempt(unsigned int cpu_id)
     pthread_mutex_lock( & current_mutex);
 
     pcb_t * process = current[cpu_id];
-
-    pthread_mutex_unlock( & current_mutex);
     ( * process).state = PROCESS_READY;
     enqueue(rq, process);
+
+    pthread_mutex_unlock( & current_mutex);
     schedule(cpu_id);
 }
 
 /**  ------------------------Problem 1-----------------------------------
  * Checkout PDF Section 3 for this problem
- * 
+ *
  * yield() is the handler called by the simulator when a process yields the
  * CPU to perform an I/O request.
  *
@@ -196,9 +203,9 @@ extern void yield(unsigned int cpu_id)
 
 /**  ------------------------Problem 1-----------------------------------
  * Checkout PDF Section 3
- * 
+ *
  * terminate() is the handler called by the simulator when a process completes.
- * 
+ *
  * @param cpu_id the cpu we want to terminate
  */
 extern void terminate(unsigned int cpu_id)
@@ -214,36 +221,44 @@ extern void terminate(unsigned int cpu_id)
 
 /**  ------------------------Problem 1A & 3---------------------------------
  * Checkout PDF Section 3 and 4 for this problem
- * 
+ *
  * wake_up() is the handler called by the simulator when a process's I/O
- * request completes. This method will also need to handle priority, 
+ * request completes. This method will also need to handle priority,
  * Look in section 5 of the PDF for more info.
- * 
+ *
  * @param process the process that finishes I/O and is ready to run on CPU
  */
 extern void wake_up(pcb_t *process)
 {
     ( * process).state = PROCESS_READY;
     enqueue(rq, process);
+
+    if (scheduler_algorithm == PR) {
+      unsigned int max = 0, cpu_id = 0;
+      pthread_mutex_lock( & current_mutex);
+
+      for (unsigned int i = 0; i < cpu_count; i++) {
+        if (!current[i] && !pthread_mutex_unlock( & current_mutex)) return;
+        if (( * current[i]).priority > max) max = ( * current[cpu_id = i]).priority;
+      }
+
+      pthread_mutex_unlock( & current_mutex);
+      if (max > ( * process).priority) force_preempt(cpu_id);
+    }
 }
 
 /**
  * main() simply parses command line arguments, then calls start_simulator().
- * Add support for -r and -p parameters. If no argument has been supplied, 
+ * Add support for -r and -p parameters. If no argument has been supplied,
  * you should default to FCFS.
- * 
+ *
  * HINT:
- * Use the scheduler_algorithm variable (see student.h) in your scheduler to 
+ * Use the scheduler_algorithm variable (see student.h) in your scheduler to
  * keep track of the scheduling algorithm you're using.
  */
 int main(int argc, char *argv[])
 {
-
-    /*
-     * FIX ME
-     */
     scheduler_algorithm = FCFS;
-
     if (argc < 2 || argc > 4)
     {
         fprintf(stderr, "CS 2200 Project 4 -- Multithreaded OS Simulator\n"
@@ -252,10 +267,10 @@ int main(int argc, char *argv[])
                         "         -r : Round-Robin Scheduler\n1\n"
                         "         -p : Priority Scheduler\n");
         return -1;
-    }else if (argc == 4 && !strcmp("-r", argv[2])) {
+    }else if (argc == 4 && !strcmp(argv[2], "-r")) {
       scheduler_algorithm = RR;
       timeslice = atoi(argv[3]);
-    }
+    }else if (argc == 3 && !strcmp(argv[2], "-p")) scheduler_algorithm = PR;
 
 
     /* Parse the command line arguments */
