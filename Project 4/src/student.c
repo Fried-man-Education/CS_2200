@@ -59,7 +59,16 @@ static unsigned int cpu_count;
  */
 void enqueue(queue_t *queue, pcb_t *process)
 {
-    /* FIX ME */
+    pthread_mutex_lock( & queue_mutex);
+    pcb_t * curr_tail = ( * queue).tail;
+
+    if (curr_tail) {
+      ( * queue).tail = ( * curr_tail).next = process;
+      ( * ( * queue).tail).next = 0;
+    } else ( * queue).head = ( * queue).tail = process;
+
+    pthread_cond_signal( & queue_not_empty);
+    pthread_mutex_unlock( & queue_mutex);
 }
 
 /**
@@ -69,8 +78,20 @@ void enqueue(queue_t *queue, pcb_t *process)
  */
 pcb_t *dequeue(queue_t *queue)
 {
-    /* FIX ME */
-    return NULL;
+    pcb_t * ret_val;
+    pthread_mutex_lock( & queue_mutex);
+
+    if (is_empty(queue)) {
+      pthread_mutex_unlock( & queue_mutex);
+      return 0;
+    }
+
+    ret_val = ( * queue).head;
+    ( * queue).head = ( * ( * queue).head).next;
+    if (!( * queue).head) ( * queue).tail = 0;
+    ( * ret_val).next = 0;
+    pthread_mutex_unlock( & queue_mutex);
+    return ret_val;
 }
 
 /** ------------------------Problem 0-----------------------------------
@@ -85,8 +106,7 @@ pcb_t *dequeue(queue_t *queue)
  */
 bool is_empty(queue_t *queue)
 {
-    /* FIX ME */
-    return false;
+    return !( * queue).head;
 }
 
 /** ------------------------Problem 1B & 3-----------------------------------
@@ -100,7 +120,15 @@ bool is_empty(queue_t *queue)
  */
 static void schedule(unsigned int cpu_id)
 {
-    /* FIX ME */
+    pcb_t * process = dequeue(rq);
+
+    if (process) {
+      ( * process).state = PROCESS_RUNNING;
+      pthread_mutex_lock( & current_mutex);
+      current[cpu_id] = process;
+      pthread_mutex_unlock( & current_mutex);
+      context_switch(cpu_id, process, 0);
+    } else context_switch(cpu_id, 0, -1);
 }
 
 /**  ------------------------Problem 1A-----------------------------------
@@ -113,19 +141,12 @@ static void schedule(unsigned int cpu_id)
  */
 extern void idle(unsigned int cpu_id)
 {
-    /* FIX ME */
-    schedule(0);
+    pthread_mutex_lock( & queue_mutex);
 
-    /*
-     * REMOVE THE LINE BELOW AFTER IMPLEMENTING IDLE()
-     *
-     * idle() must block when the ready queue is empty, or else the CPU threads
-     * will spin in a loop.  Until a ready queue is implemented, we'll put the
-     * thread to sleep to keep it from consuming 100% of the CPU time.  Once
-     * you implement a proper idle() function using a condition variable,
-     * remove the call to mt_safe_usleep() below.
-     */
-    mt_safe_usleep(1000000);
+    while (is_empty(rq)) pthread_cond_wait( & queue_not_empty, & queue_mutex);
+
+    pthread_mutex_unlock( & queue_mutex);
+    schedule(cpu_id);
 }
 
 /** ------------------------Problem 2 & 3-----------------------------------
@@ -154,7 +175,13 @@ extern void preempt(unsigned int cpu_id)
  */
 extern void yield(unsigned int cpu_id)
 {
-    /* FIX ME */
+   pthread_mutex_lock( & current_mutex);
+
+   pcb_t * process = current[cpu_id];
+   ( * process).state = PROCESS_WAITING;
+
+   pthread_mutex_unlock( & current_mutex);
+   schedule(cpu_id);
 }
 
 /**  ------------------------Problem 1-----------------------------------
@@ -166,7 +193,13 @@ extern void yield(unsigned int cpu_id)
  */
 extern void terminate(unsigned int cpu_id)
 {
-    /* FIX ME */
+    pthread_mutex_lock( & current_mutex);
+
+    pcb_t * process = current[cpu_id];
+    ( * process).state = PROCESS_TERMINATED;
+
+    pthread_mutex_unlock( & current_mutex);
+    schedule(cpu_id);
 }
 
 /**  ------------------------Problem 1A & 3---------------------------------
@@ -180,7 +213,8 @@ extern void terminate(unsigned int cpu_id)
  */
 extern void wake_up(pcb_t *process)
 {
-    /* FIX ME */
+    ( * process).state = PROCESS_READY;
+    enqueue(rq, process);
 }
 
 /**
@@ -200,7 +234,7 @@ int main(int argc, char *argv[])
      */
     scheduler_algorithm = FCFS;
 
-    if (argc != 2)
+    if (argc < 2 || argc > 4)
     {
         fprintf(stderr, "CS 2200 Project 4 -- Multithreaded OS Simulator\n"
                         "Usage: ./os-sim <# CPUs> [ -r <time slice> | -p ]\n"
