@@ -49,6 +49,9 @@ static pthread_cond_t queue_not_empty;
 static sched_algorithm_t scheduler_algorithm;
 static unsigned int cpu_count;
 
+/* keeps track of timeslice count */
+static int timeslice = 0;
+
 /** ------------------------Problem 0 & 2-----------------------------------
  * Checkout PDF Section 2 and 4 for this problem
  * 
@@ -127,7 +130,7 @@ static void schedule(unsigned int cpu_id)
       pthread_mutex_lock( & current_mutex);
       current[cpu_id] = process;
       pthread_mutex_unlock( & current_mutex);
-      context_switch(cpu_id, process, 0);
+      context_switch(cpu_id, process, timeslice);
     } else context_switch(cpu_id, 0, -1);
 }
 
@@ -162,7 +165,14 @@ extern void idle(unsigned int cpu_id)
  */
 extern void preempt(unsigned int cpu_id)
 {
-    /* FIX ME */
+    pthread_mutex_lock( & current_mutex);
+
+    pcb_t * process = current[cpu_id];
+
+    pthread_mutex_unlock( & current_mutex);
+    ( * process).state = PROCESS_READY;
+    enqueue(rq, process);
+    schedule(cpu_id);
 }
 
 /**  ------------------------Problem 1-----------------------------------
@@ -242,6 +252,9 @@ int main(int argc, char *argv[])
                         "         -r : Round-Robin Scheduler\n1\n"
                         "         -p : Priority Scheduler\n");
         return -1;
+    }else if (argc == 4 && !strcmp("-r", argv[2])) {
+      scheduler_algorithm = RR;
+      timeslice = atoi(argv[3]);
     }
 
 
