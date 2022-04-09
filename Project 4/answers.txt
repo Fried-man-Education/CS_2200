@@ -1,25 +1,25 @@
 CS 2200 Spring 2021
 Project 4
 
-Name:
-GT Username:
+Name: Andrew Friedman
+GT Username: 903506792
 
 Problem 1C (FCFS Scheduler)
 ----------
 
-/* Fix me */
+There is not a linear relationship between the number of CPUs and total execution time. Experimentally, the values do not correlate to a linear regression. The difference between the one and two CPUs was vastly larger than the difference between two and four CPUs. This is due to higher CPU utilization for two CPUs whereas with four CPUs it only has a minimal improvement because a lot of time is spent waiting for a process to become available again. It does not matter how many CPUs you have if all of them are idle because other CPUs are completing it or they are in the I/O queue. The limiting factor would be the amount of available processes for the CPUs to complete.
 
 Problem 2B (Round-Robin)
 ----------
 
-/* Fix me */
+The waiting time as time slice length decreases is decreasing in a linear fashion. For a real OS, overhead from restarting processes and general context switching overhead can be longer than the time saved from a reduced waiting time within each process. This is why it isn't usually the best for real operating systems.
 
 Problem 3B (Preemptive Priority)
 ----------
 
-/* Fix me */
+A method for reducing starvation for priority scheduling is to gradually increase the priority of processes as they age. The gradual increase would still give higher priority processes the initial importance they are given while allowing old low priority processes to not be stuck in the queue until the entire system terminates.
 
 Problem 4 (The Priority Inversion Problem)
 ---------
 
-/* Fix me */
+A potential solution is to summate all dependencies that a process has. This would allow our low level process to have a higher priority than the mediums. If you don't want to overkill the priority for processes that have a lot of low priority dependencies you could average the total summation by the amount or level of each process to enable further balancing. This would reduce complete starvation while still allowing medium priorities to have a chance to be complete before processes that just have a lot of dependencies and make them a higher priority. Another solution could be to take the highest priority out of all the dependencies and ancestor process to find the priority of the chains. 
