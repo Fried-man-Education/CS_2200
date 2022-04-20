@@ -1,2 +1,3 @@
 rtp-client
 *.dSYM
+.idea
