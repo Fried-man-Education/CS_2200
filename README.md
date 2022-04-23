@@ -36,12 +36,12 @@ Provide a broad exposure to computer system structure and networking including s
 ### Notes
 Homework assignments that are not programming implementations are excluded from this repository.
 ### Homework
-- Homework 2 - [Getting Started with the LC-22](https://github.com/Fried-man-Education/CS_2200/tree/main/Homework%202)
-- Homework 4 - [Random Message Generator](https://github.com/Fried-man-Education/CS_2200/tree/main/Homework%204)
+- Homework 02 - [Getting Started with the LC-22](https://github.com/Fried-man-Education/CS_2200/tree/main/Homework%2002)
+- Homework 04 - [Random Message Generator](https://github.com/Fried-man-Education/CS_2200/tree/main/Homework%2004)
 ### Projects
-- Project 1 - [Building the LC-22](https://github.com/Fried-man-Education/CS_2200/tree/main/Project%201)
-- Project 2 - [Interrupts](https://github.com/Fried-man-Education/CS_2200/tree/main/Project%202)
-- Project 3 - [Virtual Memory Simulation](https://github.com/Fried-man-Education/CS_2200/tree/main/Project%203)
-- Project 4 - [Process Scheduling Simulation](https://github.com/Fried-man-Education/CS_2200/tree/main/Project%204)
-- Project 5 - [Networking](https://github.com/Fried-man-Education/CS_2200/tree/main/Project%205)
+- Project 01 - [Building the LC-22](https://github.com/Fried-man-Education/CS_2200/tree/main/Project%2001)
+- Project 02 - [Interrupts](https://github.com/Fried-man-Education/CS_2200/tree/main/Project%2002)
+- Project 03 - [Virtual Memory Simulation](https://github.com/Fried-man-Education/CS_2200/tree/main/Project%2003)
+- Project 04 - [Process Scheduling Simulation](https://github.com/Fried-man-Education/CS_2200/tree/main/Project%2004)
+- Project 05 - [Networking](https://github.com/Fried-man-Education/CS_2200/tree/main/Project%2005)
 - Project EC - [Pipeline](https://github.com/Fried-man-Education/CS_2200/tree/main/Project%20EC)
